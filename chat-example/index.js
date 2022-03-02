@@ -1,7 +1,7 @@
 const app = require("express")();
 const http = require("http").Server(app);
 const io = require("socket.io")(http);
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3002;
 
 let roomList = [];
 
@@ -37,10 +37,22 @@ io.on("connection", (socket) => {
 
     switch (cmd) {
       case "/join": {
+        //trouver la room ou je suis
+        let roomResult;
+        for (let room of roomList) {
+          if (room.users.find((user) => user.id === socket.id) !== undefined)
+            roomResult = room;
+        }
+        if (roomResult !== undefined) {
+          //quitter la room
+          roomResult.users = roomResult.users.filter((e) => e.id !== socket.id);
+        }
+
         let room = roomList.find((x) => x.name === arg);
         if (room !== undefined) {
           room.users.push(socket);
         }
+        console.log("end ", roomList);
         break;
       }
       case "/create": {
